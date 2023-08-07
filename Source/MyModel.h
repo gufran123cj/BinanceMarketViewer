@@ -3,6 +3,8 @@
 #include <JuceHeader.h>
 #include "MyAsyncHttpSession.h"
 #include "MyViewInterface.h"
+#include "binancedataprovder.h"
+
 class MyModel:
 	public juce::Timer,
 	public juce::Component
@@ -29,6 +31,7 @@ public:
 	const std::vector<std::string>& getPrices() const;
 	const std::vector<int>& getIds() const;
 	std::string response;
+	std::string text;
 	MyViewInterface* view;
 
 private:

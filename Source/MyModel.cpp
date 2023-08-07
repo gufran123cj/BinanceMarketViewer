@@ -10,14 +10,31 @@ void MyModel::run()
         {
             response = res;
             parseresponse(response);
+            
            if (view)              
                 view->update();
                    
             
         });
 
+}
+void MyModel::run()
+{
+    binancedataproivder ses;
+    ses.run([this](const std::string& res)
+        {
+            text = res;
+            parseresponse(response);
+
+            if (view)
+                view->update();
+
+
+        });
 
 }
+
+
 
 void MyModel::timerCallback()
 {
