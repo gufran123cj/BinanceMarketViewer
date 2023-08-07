@@ -3,7 +3,7 @@
 #include <juce_graphics/juce_graphics.h>
 
 
-void MyModel::run()
+/*void MyModel::run()
 {
 	MyAsyncHttpSession ses;
 	ses.run([this](const std::string& res)
@@ -17,22 +17,25 @@ void MyModel::run()
             
         });
 
-}
-void MyModel::run()
-{
-    binancedataproivder ses;
-    ses.run([this](const std::string& res)
-        {
-            text = res;
-            parseresponse(response);
-
-            if (view)
-                view->update();
+}*/
 
 
+void MyModel::run() {
+    data_provider ses;
+
+    ses.run([this](const std::string& res) {
+        
+        message = res;       
+        //parseresponse(message);
+
+        if (view) {
+            view->update();  
+        }
         });
 
+    
 }
+
 
 
 

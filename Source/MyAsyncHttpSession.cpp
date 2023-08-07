@@ -5,11 +5,7 @@
 #include <vector>
 #include <boost/beast/http.hpp>
 
-//binancedataprovedier classý oluþturuulcak websocket oluþturulcak 
-//socket her zaman açýk olucak 
-//pencereyi kapatýnca kapanýncak
-//run bir kere çalýþcak timer a baðlý çalýþmýcak 
-
+//detach oluyor mu olmuyor bak main thread kitlenmiyorsa
 
 int MyAsyncHttpSession::run(std::function <void(const std::string& response)> cb)
 {

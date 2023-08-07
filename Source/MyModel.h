@@ -3,7 +3,7 @@
 #include <JuceHeader.h>
 #include "MyAsyncHttpSession.h"
 #include "MyViewInterface.h"
-#include "binancedataprovder.h"
+#include "data_provider.h"
 
 class MyModel:
 	public juce::Timer,
@@ -13,7 +13,7 @@ class MyModel:
 public:
 	MyModel(): view(nullptr)
 	{
-		startTimer(1000);
+		//startTimer(1000);
 
 	}
 	~MyModel()
@@ -25,13 +25,12 @@ public:
 		if(aView)
 			view = aView;
 	}
-
 	void run();
 	const std::vector<std::string>& getSymbols() const;
 	const std::vector<std::string>& getPrices() const;
 	const std::vector<int>& getIds() const;
 	std::string response;
-	std::string text;
+	std::string message;
 	MyViewInterface* view;
 
 private:
