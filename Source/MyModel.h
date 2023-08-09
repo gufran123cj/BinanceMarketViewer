@@ -10,6 +10,7 @@ class MyModel:
 	public juce::Component
 
 {
+
 public:
 	MyModel(): view(nullptr)
 	{

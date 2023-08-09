@@ -1,6 +1,8 @@
 #include <nlohmann/json.hpp>
 #include "MainComponent.h"
 // juce timer
+
+
 MainComponent::MainComponent(std::shared_ptr<MyModel> aModel)
 {
     model = aModel;
@@ -52,9 +54,14 @@ int MainComponent::getNumRows()
 {
     return model->getSymbols().size();
 }
-void MainComponent::paintRowBackground(juce::Graphics&, int rowNumber, int width, int height, bool rowIsSelected)
+void MainComponent::paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)
 {
-
+    auto alternateColour = getLookAndFeel().findColour(juce::ListBox::backgroundColourId)
+        .interpolatedWith(getLookAndFeel().findColour(juce::ListBox::textColourId), 0.03f);
+    if (rowIsSelected)
+        g.fillAll(juce::Colours::lightblue);
+    else if (rowNumber % 2)
+        g.fillAll(alternateColour);
 
 }
 void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
@@ -81,9 +88,7 @@ void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
     
     g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
     g.fillRect(width - 1, 0, 1, height);
-}
-
-//bu alýncak paint cell burda kalcak tablo burda klaýcak 
+} 
 
 
 
