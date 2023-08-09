@@ -5,9 +5,6 @@
 #include <vector>
 #include <boost/beast/http.hpp>
 
-
-
-
 int data_provider::run(std::function <void(const std::string& message)> cb){
     try
     {

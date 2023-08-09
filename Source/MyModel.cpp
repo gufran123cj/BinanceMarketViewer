@@ -19,6 +19,11 @@
 
 }*/
 
+//sembole çift týkla yeni sayfa aç (boþ pencere__include*  o sembolün bilgileri)
+//robotun guisini oluþturucaz (baþlat, durdur, deðeri güncelle)
+//button kullancaz(robotu baþlat (robot algoritmasý olucak)_bu robot alým yapýcak baþlattýðýmýz deðerden satarýz)
+//symbol için sýralama ekle
+
 
 void MyModel::run() {
     data_provider ses;
@@ -26,18 +31,13 @@ void MyModel::run() {
     ses.run([this](const std::string& res) {
         
         message = res;       
-        //parseresponse(message);
+        parseresponse(message);
 
         if (view) {
             view->update();  
         }
         });
-
-    
 }
-
-
-
 
 void MyModel::timerCallback()
 {
@@ -62,8 +62,8 @@ void MyModel::parseresponse(std::string response)
 
                 if (item.is_object()) {
                     
-                        symbols.push_back(item["symbol"]);
-                        prices.push_back(item["price"]);
+                        symbols.push_back(item["s"]);
+                        prices.push_back(item["c"]);
                 }
                 else {
                     std::cerr << "Error: One of the items is not a JSON object." << std::endl;
