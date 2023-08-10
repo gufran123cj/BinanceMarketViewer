@@ -24,8 +24,6 @@ MainComponent::MainComponent(std::shared_ptr<MyModel> aModel)
         50, 400,
         juce::TableHeaderComponent::defaultFlags);
     model->run();
-    
-    
 }
 MainComponent::~MainComponent()
 {
@@ -38,9 +36,27 @@ void MainComponent::resized()
 {
     table.setBoundsInset(juce::BorderSize<int>(8));
 }
+
 void MainComponent::mouseDown(const juce::MouseEvent& event)
 {
+    //bool flag = true;
+    //if (flag) // Eðer sadece belirli bir sütuna týklanýyorsa
+    //{
+    //    // Yeni pencereyi aç
+    //    juce::DialogWindow::LaunchOptions options;
+    //    options.dialogTitle = "Pencere Baþlýðý";
+    //    options.dialogBackgroundColour = juce::Colours::white;
+    //    options.escapeKeyTriggersCloseButton = true;
+    //    options.useNativeTitleBar = true;
+    //    options.resizable = true;
+    //    options.content.setOwned(new juce::Label("Pencere Ýçeriði", "Týklanan sembol: "));
+
+    //    juce::Component* parentComponent = this;
+    //    juce::Rectangle<int> areaBounds = getLocalBounds().withSize(400, 300); // Pencerenin boyutunu ayarlayýn
+    //    juce::DialogWindow::showDialog(juce::String(), parentComponent, nullptr, juce::Colours::lightgrey, true);
+    //}
 }
+
 void MainComponent::handleAsyncUpdate()
 {
     table.updateContent();
@@ -66,7 +82,6 @@ void MainComponent::paintRowBackground(juce::Graphics& g, int rowNumber, int wid
 }
 void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
 {
-    //degerleri yazdiracagimiz yer
     g.setColour(getLookAndFeel().findColour(juce::ListBox::textColourId));
     g.setFont(font);
     
@@ -84,11 +99,26 @@ void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
             flasher.setNewData(price);
             flasher.flash(g, price, 2, 0, rowNumber); // Flasher'ý burada kullanýyoruz.
         }
-    
-    
     g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
     g.fillRect(width - 1, 0, 1, height);
-} 
+    for (int i = 0; i < 4; ++i)
+    {
+        ColourChangeButton.setButtonText(symbol);
+        ColourChangeButton.setBounds(x, y, width - 4, height);
+        addAndMakeVisible(ColourChangeButton);
+        x += 8;
+        y += 35;
+    }
+    
+    
+    ColourChangeButton.onClick = [this] {
+
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "sa býlader", "as");
+
+    };
+}
+
+
 
 
 
