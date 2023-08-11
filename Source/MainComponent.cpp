@@ -9,6 +9,7 @@ MainComponent::MainComponent(std::shared_ptr<MyModel> aModel)
     setSize(1000, 800);
     addAndMakeVisible(table);
     table.setModel(this);
+    
     table.setColour(juce::ListBox::outlineColourId, juce::Colours::grey);
     table.setOutlineThickness(1);
     // symbol sutunu
@@ -38,23 +39,13 @@ void MainComponent::resized()
 }
 
 void MainComponent::mouseDown(const juce::MouseEvent& event)
-{
-    //bool flag = true;
-    //if (flag) // Eðer sadece belirli bir sütuna týklanýyorsa
-    //{
-    //    // Yeni pencereyi aç
-    //    juce::DialogWindow::LaunchOptions options;
-    //    options.dialogTitle = "Pencere Baþlýðý";
-    //    options.dialogBackgroundColour = juce::Colours::white;
-    //    options.escapeKeyTriggersCloseButton = true;
-    //    options.useNativeTitleBar = true;
-    //    options.resizable = true;
-    //    options.content.setOwned(new juce::Label("Pencere Ýçeriði", "Týklanan sembol: "));
+{   
 
-    //    juce::Component* parentComponent = this;
-    //    juce::Rectangle<int> areaBounds = getLocalBounds().withSize(400, 300); // Pencerenin boyutunu ayarlayýn
-    //    juce::DialogWindow::showDialog(juce::String(), parentComponent, nullptr, juce::Colours::lightgrey, true);
-    //}
+}
+
+void MainComponent::openNewWindow(const juce::String& symbol)
+{
+    
 }
 
 void MainComponent::handleAsyncUpdate()
@@ -66,6 +57,7 @@ void MainComponent::update()
 {
     triggerAsyncUpdate();
 }
+
 int MainComponent::getNumRows()
 {
     return model->getSymbols().size();
@@ -101,22 +93,72 @@ void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
         }
     g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
     g.fillRect(width - 1, 0, 1, height);
-    for (int i = 0; i < 4; ++i)
-    {
-        ColourChangeButton.setButtonText(symbol);
+
+        ColourChangeButton.setButtonText(model->getSymbols().at(0));
         ColourChangeButton.setBounds(x, y, width - 4, height);
         addAndMakeVisible(ColourChangeButton);
-        x += 8;
-        y += 35;
-    }
-    
-    
-    ColourChangeButton.onClick = [this] {
+        /*x += 8;
+        y += 35;*/
+        /*ColourChangeButton1.setButtonText(model->getSymbols().at(1));
+        ColourChangeButton1.setBounds(x, 60, width - 4, height);
+        addAndMakeVisible(ColourChangeButton1);
+        
+        ColourChangeButton2.setButtonText(model->getSymbols().at(2));
+        ColourChangeButton2.setBounds(x, 85, width - 4, height);
+        addAndMakeVisible(ColourChangeButton2);*/
 
-        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "sa býlader", "as");
+           
+        
+    
+    ColourChangeButton.onClick = [this,rowNumber] {
+        open_new_window(rowNumber);
+        //juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "sa býlader", "as");
 
     };
+    
+
 }
+void MainComponent::open_new_window(int rowNumber) {
+    //[{"e":"24hrMiniTicker","E":1691754449551,"s":"BTCUSDT","c":"29422.00000000","o":"29515.26000000","h":"29738.00000000","l":"29320.20000000","v":"23376.93902000","q":"689008713.92773180"},
+    //{"e":"24hrMiniTicker","E":1691754449545,"s":"XMRBTC","c":"0.00536700","o":"0.00524500","h":"0.00536800","l":"0.00524500","v":"25657.93100000","q":"136.05164730"}]
+    
+    
+    
+    juce::DocumentWindow* cleanWindow = new juce::DocumentWindow("Clean Window",
+        juce::Colours::grey,
+        juce::DocumentWindow::allButtons);
+
+    if (cleanWindow != nullptr)
+    {
+        cleanWindow->closeButtonPressed(); // Eðer varsa, mevcut pencereyi kapat
+    }
+    auto data = (model->getData());
+    auto price = juce::String(model->getPrices().at(rowNumber));
+    auto symbol = juce::String(model->getSymbols().at(rowNumber));
+    auto open_price = juce::String(model->getOpen().at(rowNumber));
+    auto high_price = juce::String(model->getHigh().at(rowNumber));
+    auto low_price = juce::String(model->getLow().at(rowNumber));
+
+    cleanWindow->setSize(600, 600);
+    cleanWindow->setVisible(true);
+    juce::Label* label = new juce::Label();
+    label->setText("Clicked Symbol: " + symbol + "\n" + "Price: " + price + "\n" + "Open Price: " + open_price + "\n" + "High Price: " + high_price + "\n" + "Low Price: " + low_price, juce::NotificationType::dontSendNotification);
+    
+    label->setBounds(10, 10, 600, 600);
+
+    cleanWindow->setContentOwned(label, false); // Ýlk etiketi pencereye ekle
+    cleanWindow->setVisible(true);
+   
+    
+        
+
+}
+
+
+
+
+
+
 
 
 

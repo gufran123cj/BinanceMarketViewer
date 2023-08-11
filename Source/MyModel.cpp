@@ -56,16 +56,27 @@ void MyModel::parseresponse(std::string response)
             return;
         }
         // Parse JSON and update the vectors
+        
         symbols.clear();
         prices.clear();
-
+        open_prices.clear();
+        high_price.clear();
+        low_price.clear();
+        total_trade_base.clear();
+        total_trade_quote.clear();
+        data.push_back(response);
         int count = 0;
         for (const auto& item : parsed_json) {
 
                 if (item.is_object()) {
+                        
                         symbols.push_back(item["s"]);
                         prices.push_back(item["c"]);
-                        
+                        open_prices.push_back(item["o"]);
+                        high_price.push_back(item["h"]);
+                        low_price.push_back(item["l"]);
+                        total_trade_base.push_back(item["v"]);
+                        total_trade_quote.push_back(item["q"]);
                 }
                 else {
                     std::cerr << "Error: One of the items is not a JSON object." << std::endl;
@@ -110,6 +121,19 @@ void MyModel::parseresponse(std::string response)
     }
 }
 
+const std::vector<std::string>& MyModel::getOpen() const
+{
+    return open_prices;
+}
+const std::vector<std::string>& MyModel::getHigh() const
+{
+    return high_price;
+}
+const std::vector<std::string>& MyModel::getLow() const
+{
+    return low_price;
+}
+
 
 
 
@@ -125,4 +149,9 @@ const std::vector<std::string>& MyModel::getPrices() const
 const std::vector<int>& MyModel::getIds() const
 {
     return ids;
+}
+
+const std::vector<std::string>& MyModel::getData() const
+{
+    return data;
 }

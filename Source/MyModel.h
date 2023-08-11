@@ -30,6 +30,10 @@ public:
 	const std::vector<std::string>& getSymbols() const;
 	const std::vector<std::string>& getPrices() const;
 	const std::vector<int>& getIds() const;
+	const std::vector<std::string>& getData() const;
+	const std::vector<std::string>& getOpen() const;
+	const std::vector<std::string>& getHigh() const;
+	const std::vector<std::string>& getLow() const;
 	std::string response;
 	std::string message;
 	MyViewInterface* view;
@@ -39,10 +43,18 @@ private:
 	juce::Font font{ 14.0f };
 	std::vector<std::string> symbols;
 	std::vector<std::string> prices;
+	std::vector<std::string> open_prices;
+	std::vector<std::string> high_price;
+	std::vector<std::string> low_price;
+	std::vector<std::string> total_trade_base;
+	std::vector<std::string> total_trade_quote;
+	std::vector<std::string> data;
 	std::vector<int> ids;
 	
 	virtual void timerCallback() override;
 	void parseresponse(std::string response);
+
+
 	
 };
 
