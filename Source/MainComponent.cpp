@@ -1,5 +1,6 @@
-#include <nlohmann/json.hpp>
 #include "MainComponent.h"
+#include <string.h>
+
 // juce timer
 
 
@@ -37,15 +38,17 @@ void MainComponent::resized()
 {
     table.setBoundsInset(juce::BorderSize<int>(8));
 }
-
-void MainComponent::mouseDown(const juce::MouseEvent& event)
-{   
-
-}
-
-void MainComponent::openNewWindow(const juce::String& symbol)
+void MainComponent::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent& e)
 {
-    
+   
+    juce::String selectedPrice = model->getPrices().at(rowNumber);
+    juce::String selectedSymbol = model->getSymbols().at(rowNumber);
+    juce::String clickedSymbol = selectedSymbol;
+    std::thread([this, rowNumber, selectedSymbol]() {
+        juce::MessageManager::callAsync([this, rowNumber, selectedSymbol]() {
+            open_new_window(rowNumber, selectedSymbol);
+            });
+        }).detach();
 }
 
 void MainComponent::handleAsyncUpdate()
@@ -93,66 +96,58 @@ void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
         }
     g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
     g.fillRect(width - 1, 0, 1, height);
-
-        ColourChangeButton.setButtonText(model->getSymbols().at(0));
-        ColourChangeButton.setBounds(x, y, width - 4, height);
-        addAndMakeVisible(ColourChangeButton);
-        /*x += 8;
-        y += 35;*/
-        /*ColourChangeButton1.setButtonText(model->getSymbols().at(1));
-        ColourChangeButton1.setBounds(x, 60, width - 4, height);
-        addAndMakeVisible(ColourChangeButton1);
-        
-        ColourChangeButton2.setButtonText(model->getSymbols().at(2));
-        ColourChangeButton2.setBounds(x, 85, width - 4, height);
-        addAndMakeVisible(ColourChangeButton2);*/
-
-           
-        
-    
-    ColourChangeButton.onClick = [this,rowNumber] {
-        open_new_window(rowNumber);
-        //juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "sa býlader", "as");
-
-    };
-    
-
 }
-void MainComponent::open_new_window(int rowNumber) {
-    //[{"e":"24hrMiniTicker","E":1691754449551,"s":"BTCUSDT","c":"29422.00000000","o":"29515.26000000","h":"29738.00000000","l":"29320.20000000","v":"23376.93902000","q":"689008713.92773180"},
-    //{"e":"24hrMiniTicker","E":1691754449545,"s":"XMRBTC","c":"0.00536700","o":"0.00524500","h":"0.00536800","l":"0.00524500","v":"25657.93100000","q":"136.05164730"}]
-    
-    
-    
-    juce::DocumentWindow* cleanWindow = new juce::DocumentWindow("Clean Window",
+void MainComponent::open_new_window(int rowNumber, juce::String clickedSymbol) {
+    //[{"e":"24hrMiniTicker","E":1692014594898,"s":"ETHBTC","c":"0.06285000","o":"0.06295000","h":"0.06318000","l":"0.06267000","v":"15405.08370000","q":"969.18640912"},
+    //{"e":"24hrMiniTicker","E":1692014594176,"s":"BTCUSDT","c":"29404.11000000","o":"29387.76000000","h":"29495.76000000","l":"29102.45000000","v":"21764.82537000","q":"638649914.49316550"}]
+    juce::DocumentWindow* cleanWindow = new juce::DocumentWindow("symbol",
         juce::Colours::grey,
         juce::DocumentWindow::allButtons);
 
-    if (cleanWindow != nullptr)
-    {
-        cleanWindow->closeButtonPressed(); // Eðer varsa, mevcut pencereyi kapat
+    if (cleanWindow != nullptr) {
+        cleanWindow->setSize(600, 600);
+        cleanWindow->setVisible(true);
+
+        juce::Label* label = new juce::Label();
+        label->setBounds(10, 10, 600, 600);
+        cleanWindow->setContentOwned(label, false); // Ýlk etiketi pencereye ekle
+        cleanWindow->setVisible(true);
+        //map bak
+        std::thread([this, label, rowNumber, clickedSymbol]() {
+            while (true) {
+                std::vector<std::string> parsedData = model->getParsed();
+                std::vector<std::string> symbols = model->getSymbols();
+                std::vector<std::string> prices = model->getPrices();
+                std::vector<std::string> openPrices = model->getOpen();
+                std::vector<std::string> highPrices = model->getHigh();
+                std::vector<std::string> lowPrices = model->getLow();
+
+                for (int i = 0; i < symbols.size(); ++i) {
+                    if (symbols[i] == clickedSymbol) {
+                        juce::String symbol = symbols[i];
+                        juce::String price = prices[i];
+                        juce::String open_price = openPrices[i];
+                        juce::String high_price = highPrices[i];
+                        juce::String low_price = lowPrices[i];
+
+                        juce::MessageManager::callAsync([label, symbol, price, open_price, high_price, low_price]() {
+                            label->setText("Clicked Symbol: " + symbol + "\n" +
+                                "Price: " + price + "\n" +
+                                "Open Price: " + open_price + "\n" +
+                                "High Price: " + high_price + "\n" +
+                                "Low Price: " + low_price, juce::NotificationType::dontSendNotification);
+                            });
+
+                        break; // Týklanan sembolü bulduktan sonra döngüden çýk
+                    }
+                }
+
+                std::this_thread::sleep_for(std::chrono::seconds(1)); 
+            }
+            }).detach();
     }
-    auto data = (model->getData());
-    auto price = juce::String(model->getPrices().at(rowNumber));
-    auto symbol = juce::String(model->getSymbols().at(rowNumber));
-    auto open_price = juce::String(model->getOpen().at(rowNumber));
-    auto high_price = juce::String(model->getHigh().at(rowNumber));
-    auto low_price = juce::String(model->getLow().at(rowNumber));
-
-    cleanWindow->setSize(600, 600);
-    cleanWindow->setVisible(true);
-    juce::Label* label = new juce::Label();
-    label->setText("Clicked Symbol: " + symbol + "\n" + "Price: " + price + "\n" + "Open Price: " + open_price + "\n" + "High Price: " + high_price + "\n" + "Low Price: " + low_price, juce::NotificationType::dontSendNotification);
-    
-    label->setBounds(10, 10, 600, 600);
-
-    cleanWindow->setContentOwned(label, false); // Ýlk etiketi pencereye ekle
-    cleanWindow->setVisible(true);
-   
-    
-        
-
 }
+
 
 
 

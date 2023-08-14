@@ -16,12 +16,11 @@ class MainComponent :
 {
 public:
     MainComponent(std::shared_ptr<MyModel> aModel);
-    ~MainComponent() override;
+    ~MainComponent();
     void paint(juce::Graphics&) override;
     void resized() override;
-    void mouseDown(const juce::MouseEvent& event)override;
+    void cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent&);
 
-    void openNewWindow(const juce::String& symbol);
     virtual void handleAsyncUpdate() override;
     virtual void update() override;
     juce::Label* label;
@@ -43,11 +42,10 @@ private:
     juce::Font font{ 14.0f };   
     // Inherited via TableListBoxModel
     // Inherited via Timer
-    virtual void open_new_window(int rowNumber);
-    
+    virtual void open_new_window(int rowNumber, juce::String clickedSymbol);
     virtual int getNumRows() override;
     virtual void paintRowBackground(juce::Graphics&, int rowNumber, int width, int height, bool rowIsSelected) override;
-    virtual void paintCell(juce::Graphics&, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
+    virtual void paintCell(juce::Graphics&, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;  
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 
         

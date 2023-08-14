@@ -1,24 +1,6 @@
 #include "MyModel.h"
 #include <nlohmann/json.hpp>
 #include <juce_graphics/juce_graphics.h>
-
-
-/*void MyModel::run()
-{
-	MyAsyncHttpSession ses;
-	ses.run([this](const std::string& res)
-        {
-            response = res;
-            parseresponse(response);
-            
-           if (view)              
-                view->update();
-                   
-            
-        });
-
-}*/
-
 //sembole çift týkla yeni sayfa aç (boþ pencere__include*  o sembolün bilgileri)
 //robotun guisini oluþturucaz (baþlat, durdur, deðeri güncelle)
 //button kullancaz(robotu baþlat (robot algoritmasý olucak)_bu robot alým yapýcak baþlattýðýmýz deðerden satarýz)
@@ -77,12 +59,24 @@ void MyModel::parseresponse(std::string response)
                         low_price.push_back(item["l"]);
                         total_trade_base.push_back(item["v"]);
                         total_trade_quote.push_back(item["q"]);
+                        std::string parsedElement = R"({"e":")" + item["e"].get<std::string>() + R"(","E":)" +
+                            std::to_string(item["E"].get<long>()) + R"(,"s":")" +
+                            item["s"].get<std::string>() + R"(","c":")" +
+                            item["c"].get<std::string>() + R"(","o":")" +
+                            item["o"].get<std::string>() + R"(","h":")" +
+                            item["h"].get<std::string>() + R"(","l":")" +
+                            item["l"].get<std::string>() + R"(","v":")" +
+                            item["v"].get<std::string>() + R"(","q":")" +
+                            item["q"].get<std::string>() + "\"}";
+
+                        parsedElements.push_back(parsedElement);
                 }
                 else {
                     std::cerr << "Error: One of the items is not a JSON object." << std::endl;
                     return;
                 }
         }
+        
         // Sembol adýna göre verileri sýrala
         std::vector<size_t> indices(symbols.size());
         for (size_t i = 0; i < symbols.size(); ++i) {
@@ -121,6 +115,7 @@ void MyModel::parseresponse(std::string response)
     }
 }
 
+
 const std::vector<std::string>& MyModel::getOpen() const
 {
     return open_prices;
@@ -134,8 +129,14 @@ const std::vector<std::string>& MyModel::getLow() const
     return low_price;
 }
 
-
-
+//void MyModel::addListener(data_listener aListener)
+//{
+//
+//}
+const std::vector<std::string>& MyModel::getParsed() const
+{
+    return parsedElements;
+}
 
 const std::vector<std::string>& MyModel::getSymbols() const
 {

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <boost/beast/http.hpp>
-
+//observerpatterne çevircez
 int data_provider::run(std::function <void(const std::string& message)> cb){
     try
     {
@@ -70,7 +70,7 @@ int data_provider::run(std::function <void(const std::string& message)> cb){
                 ws.read(buffer);
                 std::string message = beast::buffers_to_string(buffer.data());
                 cb(message);
-
+                //for yaz listennerlar at 
             }
             
             
