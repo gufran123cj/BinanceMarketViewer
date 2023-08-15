@@ -2,8 +2,6 @@
 #include <string.h>
 
 // juce timer
-
-
 MainComponent::MainComponent(std::shared_ptr<MyModel> aModel)
 {
     model = aModel;
@@ -92,15 +90,14 @@ void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
         {
             g.drawText(price, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
             flasher.setNewData(price);
-            flasher.flash(g, price, 2, 0, rowNumber); // Flasher'ý burada kullanýyoruz.
+            flasher.flash(g, price, 2, 0, rowNumber); 
         }
     g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
     g.fillRect(width - 1, 0, 1, height);
 }
 void MainComponent::open_new_window(int rowNumber, juce::String clickedSymbol) {
-    //[{"e":"24hrMiniTicker","E":1692014594898,"s":"ETHBTC","c":"0.06285000","o":"0.06295000","h":"0.06318000","l":"0.06267000","v":"15405.08370000","q":"969.18640912"},
-    //{"e":"24hrMiniTicker","E":1692014594176,"s":"BTCUSDT","c":"29404.11000000","o":"29387.76000000","h":"29495.76000000","l":"29102.45000000","v":"21764.82537000","q":"638649914.49316550"}]
-    juce::DocumentWindow* cleanWindow = new juce::DocumentWindow("symbol",
+
+    juce::DocumentWindow* cleanWindow = new juce::DocumentWindow(clickedSymbol + " COIN",
         juce::Colours::grey,
         juce::DocumentWindow::allButtons);
 
@@ -110,9 +107,9 @@ void MainComponent::open_new_window(int rowNumber, juce::String clickedSymbol) {
 
         juce::Label* label = new juce::Label();
         label->setBounds(10, 10, 600, 600);
-        cleanWindow->setContentOwned(label, false); // Ýlk etiketi pencereye ekle
+        cleanWindow->setContentOwned(label, false); 
         cleanWindow->setVisible(true);
-        //map bak
+
         std::thread([this, label, rowNumber, clickedSymbol]() {
             while (true) {
                 std::vector<std::string> parsedData = model->getParsed();
@@ -129,7 +126,7 @@ void MainComponent::open_new_window(int rowNumber, juce::String clickedSymbol) {
                         juce::String open_price = openPrices[i];
                         juce::String high_price = highPrices[i];
                         juce::String low_price = lowPrices[i];
-
+                        flasher.setNewData(price);
                         juce::MessageManager::callAsync([label, symbol, price, open_price, high_price, low_price]() {
                             label->setText("Clicked Symbol: " + symbol + "\n" +
                                 "Price: " + price + "\n" +
@@ -138,15 +135,16 @@ void MainComponent::open_new_window(int rowNumber, juce::String clickedSymbol) {
                                 "Low Price: " + low_price, juce::NotificationType::dontSendNotification);
                             });
 
-                        break; // Týklanan sembolü bulduktan sonra döngüden çýk
+                        break;
                     }
                 }
 
-                std::this_thread::sleep_for(std::chrono::seconds(1)); 
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
             }).detach();
     }
 }
+
 
 
 

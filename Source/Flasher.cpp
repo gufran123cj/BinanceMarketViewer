@@ -36,7 +36,6 @@ void Flasher::setNewData(const juce::String& newData)
     currentData = newData;
     tempdata.push_back(newData);//önceki verileri tuutyoruz
 }
-
 void Flasher::flash(juce::Graphics& g, const juce::String& text, int x, int y, int row)
 {
 

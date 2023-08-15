@@ -9,8 +9,6 @@
 class MyModel:
 	public juce::Timer,
 	public juce::Component
-	 
-
 {
 
 public:

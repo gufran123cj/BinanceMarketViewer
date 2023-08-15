@@ -1,7 +1,7 @@
 #include "MyModel.h"
 #include <nlohmann/json.hpp>
 #include <juce_graphics/juce_graphics.h>
-//sembole çift týkla yeni sayfa aç (boþ pencere__include*  o sembolün bilgileri)
+//sembole çift týkla yeni sayfa aç (boþ pencere__include*  o sembolün bilgileri)(completed)
 //robotun guisini oluþturucaz (baþlat, durdur, deðeri güncelle)
 //button kullancaz(robotu baþlat (robot algoritmasý olucak)_bu robot alým yapýcak baþlattýðýmýz deðerden satarýz)
 //symbol için sýralama ekle(completed)
