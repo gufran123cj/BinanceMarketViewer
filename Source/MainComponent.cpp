@@ -38,16 +38,20 @@ void MainComponent::resized()
 }
 void MainComponent::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent& e)
 {
+
+    
+
+    std::map<std::string, MarketData> dataMap = model->data; 
+    auto it = std::next(dataMap.begin(), rowNumber);
+
+    const std::string& selectedSymbol = it->first;
+    const MarketData& selectedData = it->second;  
    
-    juce::String selectedPrice = model->getPrices().at(rowNumber);
-    juce::String selectedSymbol = model->getSymbols().at(rowNumber);
-    juce::String clickedSymbol = selectedSymbol;
-    std::thread([this, rowNumber, selectedSymbol]() {
-        juce::MessageManager::callAsync([this, rowNumber, selectedSymbol]() {
-            open_new_window(rowNumber, selectedSymbol);
-            });
-        }).detach();
+    newnw* newWindow = new newnw(selectedSymbol, model);
+   
 }
+
+
 
 void MainComponent::handleAsyncUpdate()
 {
@@ -61,7 +65,7 @@ void MainComponent::update()
 
 int MainComponent::getNumRows()
 {
-    return model->getSymbols().size();
+    return model->data.size();
 }
 void MainComponent::paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)
 {
@@ -77,83 +81,22 @@ void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
 {
     g.setColour(getLookAndFeel().findColour(juce::ListBox::textColourId));
     g.setFont(font);
-    
-    auto price = juce::String(model->getPrices().at(rowNumber));
-    auto symbol = juce::String(model->getSymbols().at(rowNumber));
 
-    
-        if (columnId == 1)
-        {
-            g.drawText(symbol, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
-        }
-        else if (columnId == 2)
-        {
-            g.drawText(price, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
-            flasher.setNewData(price);
-            flasher.flash(g, price, 2, 0, rowNumber); 
-        }
+    size_t counter = 0;
+     auto map_it = model->data.begin();
+     std::advance(map_it, rowNumber);
+
+    if (columnId == 1)
+    {
+        g.drawText(map_it->first, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+    }
+    else if (columnId == 2)
+    {
+        g.drawText(map_it->second.price, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+        flasher.setNewData(map_it->second.price);
+        flasher.flash(g, map_it->second.price, 2, 0, rowNumber);
+    }
     g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
     g.fillRect(width - 1, 0, 1, height);
+
 }
-void MainComponent::open_new_window(int rowNumber, juce::String clickedSymbol) {
-
-    juce::DocumentWindow* cleanWindow = new juce::DocumentWindow(clickedSymbol + " COIN",
-        juce::Colours::grey,
-        juce::DocumentWindow::allButtons);
-
-    if (cleanWindow != nullptr) {
-        cleanWindow->setSize(600, 600);
-        cleanWindow->setVisible(true);
-
-        juce::Label* label = new juce::Label();
-        label->setBounds(10, 10, 600, 600);
-        cleanWindow->setContentOwned(label, false); 
-        cleanWindow->setVisible(true);
-
-        std::thread([this, label, rowNumber, clickedSymbol]() {
-            while (true) {
-                std::vector<std::string> parsedData = model->getParsed();
-                std::vector<std::string> symbols = model->getSymbols();
-                std::vector<std::string> prices = model->getPrices();
-                std::vector<std::string> openPrices = model->getOpen();
-                std::vector<std::string> highPrices = model->getHigh();
-                std::vector<std::string> lowPrices = model->getLow();
-
-                for (int i = 0; i < symbols.size(); ++i) {
-                    if (symbols[i] == clickedSymbol) {
-                        juce::String symbol = symbols[i];
-                        juce::String price = prices[i];
-                        juce::String open_price = openPrices[i];
-                        juce::String high_price = highPrices[i];
-                        juce::String low_price = lowPrices[i];
-                        flasher.setNewData(price);
-                        juce::MessageManager::callAsync([label, symbol, price, open_price, high_price, low_price]() {
-                            label->setText("Clicked Symbol: " + symbol + "\n" +
-                                "Price: " + price + "\n" +
-                                "Open Price: " + open_price + "\n" +
-                                "High Price: " + high_price + "\n" +
-                                "Low Price: " + low_price, juce::NotificationType::dontSendNotification);
-                            });
-
-                        break;
-                    }
-                }
-
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
-            }).detach();
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-

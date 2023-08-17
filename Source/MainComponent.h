@@ -4,6 +4,7 @@
 #include "MyViewInterface.h"
 #include "MyModel.h"
 #include "Flasher.h"
+#include "newnw.h"
 
 class MainComponent :
     public juce::Component,
@@ -42,7 +43,6 @@ private:
     juce::Font font{ 14.0f };   
     // Inherited via TableListBoxModel
     // Inherited via Timer
-    virtual void open_new_window(int rowNumber, juce::String clickedSymbol);
     virtual int getNumRows() override;
     virtual void paintRowBackground(juce::Graphics&, int rowNumber, int width, int height, bool rowIsSelected) override;
     virtual void paintCell(juce::Graphics&, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;  

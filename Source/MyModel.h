@@ -1,18 +1,25 @@
 #pragma once
+#ifndef mymodel_h
+#define mymodel_h
+
+
 #include <string>
 #include <JuceHeader.h>
 #include "MyAsyncHttpSession.h"
 #include "MyViewInterface.h"
 #include "data_provider.h"
 #include "data_listener.h"
-//buraya include edicek
+
+
 class MyModel:
 	public juce::Timer,
 	public juce::Component
 {
-
+	
 public:
-	MyModel(): view(nullptr)
+	
+	MyModel() : view(nullptr)
+		, data()
 	{
 		//startTimer(1000);
 
@@ -27,15 +34,12 @@ public:
 			view = aView;
 	}
 	void run();
-	const std::vector<std::string>& getParsed() const;
-	const std::vector<std::string>& getSymbols() const;
-	const std::vector<std::string>& getPrices() const;
-	const std::vector<int>& getIds() const;
-	const std::vector<std::string>& getData() const;
-	const std::vector<std::string>& getOpen() const;
-	const std::vector<std::string>& getHigh() const;
-	const std::vector<std::string>& getLow() const;
-	/*void addListener(data_listener aListener);*/
+	void onDataReceived(const std::string& message);
+	void addDataListener(data_listener* listener);
+
+	std::vector<data_listener*> listeners;
+	std::map<std::string, MarketData>data;
+	
 	std::string response;
 	std::string message;
 	MyViewInterface* view;
@@ -51,7 +55,6 @@ private:
 	std::vector<std::string> low_price;
 	std::vector<std::string> total_trade_base;
 	std::vector<std::string> total_trade_quote;
-	std::vector<std::string> data;
 	std::vector<int> ids;
 	
 	virtual void timerCallback() override;
@@ -62,3 +65,4 @@ private:
 	
 };
 
+#endif // !mymodel_h

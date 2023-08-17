@@ -1,4 +1,8 @@
 #pragma once
+#ifndef data_provider_h
+#define data_provider_h
+
+
 #include "root_certificates.hpp"
 
 #include <boost/beast/core.hpp>
@@ -24,3 +28,4 @@ class data_provider
 public:
 	int run(std::function <void(const std::string& message)> cb);
 };
+#endif // !data_provider_h

@@ -1,10 +1,22 @@
 #pragma once
-#include <string>
 #ifndef data_listener_h
 #define data_listener_h
 
-class data_listener {
-	virtual void onDataReceived(const std::string& symbol) = 0;
+#include <string>
+#include <map>
+struct MarketData {
+	std::string symbol;
+	std::string price;
+	std::string open_price;
+	std::string high_price;
+	std::string low_price;
+	std::string total_trade_base;
+	std::string total_trade_quote;
 };
-#endif // !data_listener.h
 
+class data_listener {
+public: 
+    virtual void onDataReceived(std::map<std::string, MarketData>& data) = 0;
+    
+};
+#endif // !1
