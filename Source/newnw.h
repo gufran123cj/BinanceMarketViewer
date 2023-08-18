@@ -13,7 +13,7 @@ class newnw:
 	public MyViewInterface
 {
 public:
-	newnw(std::string clickcedsymbol, std::shared_ptr<MyModel> model);
+	newnw(juce::String clickcedsymbol, std::shared_ptr<MyModel> aModel);
 		
 
 	virtual void onDataReceived(std::map<std::string, MarketData>& data) override;

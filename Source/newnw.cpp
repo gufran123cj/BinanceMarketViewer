@@ -1,30 +1,37 @@
 #include "newnw.h"
 #include "MainComponent.h"
 #include "MyModel.h"
+#include "map";
 
 
-newnw::newnw(std::string clickcedsymbol, std::shared_ptr<MyModel> aModel) :
-    juce::DocumentWindow(clickcedsymbol + " COIN",
-        juce::Colours::grey,
+newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
+    juce::DocumentWindow(clickedSymbol, juce::Desktop::getInstance().getDefaultLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId),
         juce::DocumentWindow::allButtons)
 {
-
-    juce::Label* label = new juce::Label("CryptoDetailLabel", "Crypto Name: ");
-    label->setSize(400, 100);
-    label->setJustificationType(juce::Justification::centred);
     this->model = aModel;
-    model->addDataListener(this);
-    setContentOwned(label, true);
+    setSize(800, 800);
+    /*model->addDataListener(this);*/
 
-    setSize(600, 200);
+#if JUCE_IOS || JUCE_ANDROID
+    setFullScreen(true);
+#else
+    setResizable(true, true);
     centreWithSize(getWidth(), getHeight());
+#endif
+
     setVisible(true);
     createTable();
-    
+    setUsingNativeTitleBar(true);
+    setContentOwned(&table, true);
+
+
 }
+
 
 void newnw::onDataReceived(std::map<std::string, MarketData>& data)
 {
+    
+    
 
 }
 
@@ -59,42 +66,42 @@ void newnw::createTable()
     table.setOutlineThickness(1);
     table.getHeader().addColumn(juce::String("SYMBOL"),
         1,
-        50,
-        50, 350,
+        100,
+        100, 500,
         juce::TableHeaderComponent::defaultFlags);
     table.getHeader().addColumn(juce::String("PRICE"),
         2,
-        50,
-        50, 350,
+        100,
+        100, 500,
         juce::TableHeaderComponent::defaultFlags);
     table.getHeader().addColumn(juce::String("OPEN PRICE"),
         3,
-        50,
-        50, 350,
+        100,
+        100, 500,
         juce::TableHeaderComponent::defaultFlags);
 
     table.getHeader().addColumn(juce::String("LOW PRICE"),
         4,
-        50,
-        50, 350,
+        100,
+        100, 500,
         juce::TableHeaderComponent::defaultFlags);
 
     table.getHeader().addColumn(juce::String("HIGH PRICE"),
         5,
-        50,
-        50, 350,
+        100,
+        100, 500,
         juce::TableHeaderComponent::defaultFlags);
 
     table.getHeader().addColumn(juce::String("TOTAL TRADE BASE"),
         6,
-        50,
-        50, 350,
+        100,
+        100, 500,
         juce::TableHeaderComponent::defaultFlags);
 
     table.getHeader().addColumn(juce::String("TOTAL QUOTE BASE"),
         7,
-        50,
-        50, 350,
+        100,
+        100, 500,
         juce::TableHeaderComponent::defaultFlags);
 
 }
@@ -118,3 +125,4 @@ void newnw::paintCell(juce::Graphics&, int rowNumber, int columnId, int width, i
 {
 
 }
+
