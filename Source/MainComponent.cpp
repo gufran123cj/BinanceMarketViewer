@@ -82,7 +82,7 @@ void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
     g.setColour(getLookAndFeel().findColour(juce::ListBox::textColourId));
     g.setFont(font);
 
-    size_t counter = 0;
+     size_t counter = 0;
      auto map_it = model->data.begin();
      std::advance(map_it, rowNumber);
 
@@ -92,7 +92,7 @@ void MainComponent::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
     }
     else if (columnId == 2)
     {
-        g.drawText(map_it->second.price, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+        g.drawText(map_it->second.price, 2, 0, width - 4, height, juce::Justification::centredLeft, true);      
         flasher.setNewData(map_it->second.price);
         flasher.flash(g, map_it->second.price, 2, 0, rowNumber);
     }

@@ -30,12 +30,6 @@ public:
 protected:
 
 private:
-    int x = 8;
-    int y = 35;
-    juce::OwnedArray<juce::TextButton> buttons;
-    juce::TextButton(ColourChangeButton);
-    juce::TextButton(ColourChangeButton1);
-    juce::TextButton(ColourChangeButton2);
     Flasher flasher;
     std::shared_ptr<MyModel> model;
     juce::TableListBox table;
