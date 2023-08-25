@@ -34,7 +34,7 @@ void resetLastFlashTime()
 void Flasher::setNewData(const juce::String& newData)
 {
     currentData = newData;
-    tempdata.push_back(newData);//önceki verileri tuutyoruz
+    tempdata.push_back(newData);
 }
 void Flasher::flash(juce::Graphics& g, const juce::String& text, int x, int y, int row)
 {

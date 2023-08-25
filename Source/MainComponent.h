@@ -20,6 +20,7 @@ public:
     ~MainComponent();
     void paint(juce::Graphics&) override;
     void resized() override;
+    void sortOrderChanged(int newSortColumnId, bool isForwards);
     void cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent&);
 
     virtual void handleAsyncUpdate() override;

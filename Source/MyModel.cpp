@@ -2,10 +2,14 @@
 #include <nlohmann/json.hpp>
 #include <juce_graphics/juce_graphics.h>
 #include "data_listener.h"
-//sembole çift týkla yeni sayfa aç (boþ pencere__include*  o sembolün bilgileri)(completed)
-//robotun guisini oluþturucaz (baþlat, durdur, deðeri güncelle)
+//TASK---
 //button kullancaz(robotu baþlat (robot algoritmasý olucak)_bu robot alým yapýcak baþlattýðýmýz deðerden satarýz)
-//symbol için sýralama ekle(completed)
+//take profit order diye class oluþturuun
+//spot account bak
+// PROBLEMS---
+//coin penceresini kapatýnca bütün guiler kapanýyor
+//symbole týklandýðýnda deðerler sýralýncak 
+//flasher classýna bak patlamýþ olabilir
 
 
 
@@ -52,7 +56,7 @@ void MyModel::parseresponse(std::string response)
         }        
         int count = 0;
         for (const auto& item : parsed_json) {
-
+            
                 if (item.is_object()) {
                     const std::string symbol = item["s"];
                     data[symbol].price = item["c"];
@@ -66,36 +70,14 @@ void MyModel::parseresponse(std::string response)
                     std::cerr << "Error: One of the items is not a JSON object." << std::endl;
                     return;
                 }
-        }
 
+        }
+        
         for (auto& i : listeners)
         {
             
                 i->onDataReceived(data);
         }
-        /*std::vector<size_t> indices(symbols.size());
-        for (size_t i = 0; i < symbols.size(); ++i) {
-            indices[i] = i;
-        }
-
-        auto customSort = [&](size_t i, size_t j) {
-            return symbols[i] < symbols[j];
-        };
-
-        std::sort(indices.begin(), indices.end(), customSort);
-
-        std::vector<std::string> sortedSymbols(symbols.size());
-        std::vector<std::string> sortedPrices(prices.size());
-        std::vector<int> sortedIds(ids.size());
-
-        for (size_t i = 0; i < symbols.size(); ++i) {
-            size_t index = indices[i];
-            sortedSymbols[i] = symbols[index];
-            sortedPrices[i] = prices[index];
-        }
-
-        symbols = std::move(sortedSymbols);
-        prices = std::move(sortedPrices);*/
 
         
     }

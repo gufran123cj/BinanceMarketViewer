@@ -5,6 +5,8 @@
 #include "Flasher.h"
 
 
+
+
 class MyModel;
 
 class newnw :

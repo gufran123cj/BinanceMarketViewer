@@ -2,14 +2,14 @@
 #include "MainComponent.h"
 #include "MyModel.h"
 #include "map";
-
+#include "BinanceBotApplication.h"
 
 newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
     juce::DocumentWindow(clickedSymbol, juce::Desktop::getInstance().getDefaultLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId),
         juce::DocumentWindow::allButtons), selectedSymbol(clickedSymbol)
 {
     this->model = aModel;
-   setSize(720, 300);
+    setSize(720, 300);
     model->addDataListener(this);
 
 #if JUCE_IOS || JUCE_ANDROID
@@ -117,18 +117,10 @@ int newnw::getNumRows()
     return 0;
 }
 
+
+
 void newnw::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
 {
-    button.setButtonText("START");
-    addAndMakeVisible(&button);
-    button.setBounds(100, 150, 70, 70);
-    button1.setButtonText("STOP");
-    addAndMakeVisible(&button1);
-    button1.setBounds(210, 150, 70, 70);
-    button2.setButtonText("ENTER");
-    addAndMakeVisible(&button2);
-    button2.setBounds(320, 150, 70, 70);
-
     g.fillAll(juce::Colours::white);
 
     if (rowIsSelected)
@@ -179,9 +171,29 @@ void newnw::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width,
             break;
         }
     }
+    button.setButtonText("START");
+    addAndMakeVisible(&button);
+    button.setBounds(100, 150, 70, 70);
+    button1.setButtonText("STOP");
+    addAndMakeVisible(&button1);
+    button1.setBounds(210, 150, 70, 70);
+    button2.setButtonText("ENTER");
+    addAndMakeVisible(&button2);
+    button2.setBounds(320, 150, 70, 70);
 
     button.onClick = [this]() {
-       
+        //týklanansembol yollancak
+        boost::asio::io_context ioContext;
+
+        std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
+        std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
+
+        BinanceBotApplication bot(ioContext, apiKey, secretKey);
+        bot.run();
+
+        ioContext.run();
+
+        return 0;
     };
 
     button1.onClick = [this]() {

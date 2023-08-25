@@ -1,0 +1,39 @@
+#pragma once
+#ifndef BinanceBotApplication_h
+#define BinanceBotApplication_h
+
+
+#include "root_certificates.hpp"
+
+#include <boost/beast/core.hpp>
+#include <boost/beast/ssl.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/beast/websocket/ssl.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl/stream.hpp>
+#include <cstdlib>
+#include <iostream>
+#include <string>
+namespace beast = boost::beast;         // from <boost/beast.hpp>
+namespace http = beast::http;           // from <boost/beast/http.hpp>
+namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
+namespace net = boost::asio;            // from <boost/asio.hpp>
+namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
+using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+
+class BinanceBotApplication
+{
+public:
+	BinanceBotApplication(boost::asio::io_context& ioContext, const std::string& apiKey, const std::string& secretKey);
+	void run();
+
+    void startTrading();
+
+private:
+    std::string createSignature(const std::string& payload) const;
+    boost::asio::io_context& ioContext;
+    std::string apiKey;
+    std::string secretKey;
+};
+#endif // !BinanceBotApplication_h
