@@ -27,6 +27,7 @@ public:
 	void createTable();
 	void closeButtonPressed() override;
 private:
+	juce::GroupComponent group;
 	std::shared_ptr<MyModel> model;
 	Flasher flasher;
 	juce::TextButton button;

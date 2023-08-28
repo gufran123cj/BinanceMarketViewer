@@ -13,99 +13,89 @@ BinanceBotApplication::BinanceBotApplication(boost::asio::io_context& ioContext,
     : ioContext(ioContext), apiKey(apiKey), secretKey(secretKey)
 {
 }
-
-void BinanceBotApplication::run()
+/*int BinanceBotApplication::getTickerPrice(const std::string& symbol)
 {
-    asio::ip::tcp::resolver resolver(ioContext);
-    asio::ip::tcp::resolver::query query("api.binance.com", "443");
-    auto endpoints = resolver.resolve(query);
-
-    asio::ssl::context sslContext(asio::ssl::context::sslv23_client);
-    asio::ssl::stream<asio::ip::tcp::socket> sslSocket(ioContext, sslContext);
-    asio::connect(sslSocket.lowest_layer(), endpoints);
-
-    sslSocket.handshake(asio::ssl::stream_base::client);
-
-    // API isteði oluþtur
-    std::string queryString = "symbol=BTCUSDT";
-    std::string timestamp = std::to_string(std::time(nullptr));
-    std::string signature = createSignature(queryString + "&timestamp=" + timestamp);
-
-    std::string request = "POST /api/v3/ticker/price?" + queryString + "&timestamp=" + timestamp + "&signature=" + signature + " HTTP/1.1\r\n"
-        "Host: api.binance.com\r\n"
-        "Connection: close\r\n"
-        "\r\n";
-
-    asio::write(sslSocket, asio::buffer(request));
-
-    std::string response;
-    char buffer[1024];
-    while (std::size_t bytes = asio::read(sslSocket, asio::buffer(buffer, sizeof(buffer))))
-    {
-        response.append(buffer, bytes);
-    }
-
-    std::cout << "API Response:\n" << response << std::endl;
-    startTrading();
-}
-void BinanceBotApplication::startTrading()
-{
-    while (true)
-    {
-        //double currentPrice = getLatestPrice(); 
-
-        //// þimdilik 100 alým deðeri týklanansembolun 5 týk kademesine göre alýnýcak 
-        //if (currentPrice < 100.0)
-        //{
-        //    buyAsset(currentPrice);
-        //}
-        //else if (currentPrice > 110.0)
-        //{
-        //    sellAsset(currentPrice);
-        //}
-
-        // Belirli bir süre sonra tekrar kontrol etcek eþkilde ayarla
-    }
+    std::string url = "https://api.binance.com/api/v3/ticker/price?symbol=" + symbol;
+    std::string response = get(url);
+    return json::parse(response);
 }
 
-std::string BinanceBotApplication::createSignature(const std::string& payload) const
+int BinanceBotApplication::getOrderBook(const std::string& symbol, int limit)
 {
-    unsigned char hmacResult[EVP_MAX_MD_SIZE];
-    unsigned int hmacResultLength;
+    std::string url = "https://api.binance.com/api/v3/depth?symbol=" + symbol + "&limit=" + std::to_string(limit);
+    std::string response = get(url);
+    return json::parse(response);
+}*/
 
-    HMAC(
-        EVP_sha256(),
-        secretKey.c_str(), static_cast<int>(secretKey.size()),
-        reinterpret_cast<const unsigned char*>(payload.c_str()), payload.size(),
-        hmacResult, &hmacResultLength);
+std::string BinanceBotApplication::placeOrder(const std::string& symbol, const std::string& side, double quantity, double price)
+{
+    std::string url = "https://api.binance.com/api/v3/order";
+    std::string timestamp = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+    std::string query = "symbol=" + symbol + "&side=" + side + "&type=LIMIT&timeInForce=GTC&quantity=" + std::to_string(quantity) + "&price=" + std::to_string(price) + "&timestamp=" + timestamp;
+    std::string signature = hmac_sha256(query, apiKey);
+    std::string response = post(url, query + "&signature=" + signature, { "X-MBX-APIKEY: " + secretKey });
+    return response;
+}
+std::string BinanceBotApplication::post(const std::string& url, const std::string& data, const std::vector<std::string>& headers)
+{
+    asio::io_context io_context;
+    asio::ip::tcp::resolver resolver(io_context);
+    asio::ip::tcp::socket socket(io_context);
 
+    // Resolve endpoint
+    auto endpoints = resolver.resolve(url, "http");
+    asio::connect(socket, endpoints);
+
+    // Prepare HTTP request
+    beast::http::request<beast::http::string_body> request(beast::http::verb::post, url, 11);
+    request.body() = data;
+    request.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+    request.set(beast::http::field::content_type, "application/x-www-form-urlencoded");
+    request.prepare_payload();
+
+    // Send HTTP request
+    beast::http::write(socket, request);
+
+    // Receive HTTP response
+    beast::flat_buffer buffer;
+    beast::http::response<beast::http::string_body> response;
+    beast::http::read(socket, buffer, response);
+
+    socket.shutdown(asio::ip::tcp::socket::shutdown_both);
+    socket.close();
+
+    return response.body();
+}
+size_t BinanceBotApplication::writeCallback(char* ptr, size_t size, size_t nmemb, void* userdata)
+{
+    std::string* response = (std::string*)userdata;
+    response->append(ptr, size * nmemb);
+    return size * nmemb;
+}
+
+std::string BinanceBotApplication::hmac_sha256(const std::string& data, const std::string& key)
+{
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    HMAC_CTX* hmac = HMAC_CTX_new();
+    HMAC_Init_ex(hmac, key.c_str(), key.length(), EVP_sha256(), NULL);
+    HMAC_Update(hmac, (const unsigned char*)data.c_str(), data.length());
+    unsigned int length = SHA256_DIGEST_LENGTH;
+    HMAC_Final(hmac, hash, &length);
+    HMAC_CTX_free(hmac);
     std::stringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (unsigned int i = 0; i < hmacResultLength; ++i)
+    ss << std::hex;
+    for (unsigned char i : hash)
     {
-        ss << std::setw(2) << static_cast<int>(hmacResult[i]);
+        ss << std::setw(2) << std::setfill('0') << (int)i;
     }
-
     return ss.str();
 }
-double getLatestPrice()
-{
-    // Binance API'den veriyi al
 
-    // API yanýtýný analiz ederek güncel fiyatý çýkartma iþlemi
-    return 0;
-}
 
-void buyAsset(double price)
-{
-    // Alým iþlemi yapma kodunu burada gerçekleþtirin
-    // API ile uygun þekilde sipariþ oluþturmalýsýnýz
-    // Örneðin: createBuyOrder(amount, price);
-}
 
-void sellAsset(double price)
-{
-    // Satým iþlemi yapma kodunu burada gerçekleþtirin
-    // API ile uygun þekilde sipariþ oluþturmalýsýnýz
-    // Örneðin: createSellOrder(amount, price);
-}
+
+
+
+
+
+

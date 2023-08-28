@@ -9,6 +9,43 @@ newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
         juce::DocumentWindow::allButtons), selectedSymbol(clickedSymbol)
 {
     this->model = aModel;
+    group.addAndMakeVisible(button);
+    group.addAndMakeVisible(button1);
+    group.addAndMakeVisible(button2);
+    group.addAndMakeVisible(table);
+    /////////////////////////////////
+    button.setButtonText("START");
+    button1.setButtonText("STOP");
+    button2.setButtonText("ENTER");
+   
+    button.onClick = [this]() {
+        boost::asio::io_context ioContext;
+
+        std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
+        std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
+
+        BinanceBotApplication bot(ioContext, apiKey, secretKey);
+
+        //std::string symbol = "BTCUSDT";
+        //double quantity = 0.1;
+        //double marginPercent = 0.005; // %0.5 margin
+        
+        //bot.placeBuyOrderWithMargin(symbol, quantity, marginPercent);
+        //bot.placeSellOrderWithMargin(symbol, quantity, marginPercent);
+
+        std::string order = bot.placeOrder("BTCUSDT", "BUY", 0.01, 50000);       
+        ioContext.run();
+
+        return 0;
+    };
+
+    button1.onClick = [this]() {
+
+    };
+
+    button2.onClick = [this]() {
+
+    };
     setSize(720, 300);
     model->addDataListener(this);
 
@@ -22,7 +59,7 @@ newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
     setVisible(true);
     createTable();
     setUsingNativeTitleBar(true);
-    setContentOwned(&table, false);
+    setContentOwned(&group, false);
 
 }
 
@@ -36,7 +73,11 @@ void newnw::onDataReceived(std::map<std::string, MarketData>& data)
 
 void newnw::resized()
 {
-	table.setBoundsInset(juce::BorderSize<int>(8));
+    group.setBoundsInset(juce::BorderSize<int>(8));
+    table.setBoundsRelative(0,0,1,0.5);
+    button.setBoundsRelative(0, 0.5, 0.3, 0.5);
+    button1.setBoundsRelative(0.3, 0.5, 0.3, 0.5);
+    button2.setBoundsRelative(0.6, 0.5, 0.3, 0.5);
 
 }
 
@@ -171,38 +212,8 @@ void newnw::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width,
             break;
         }
     }
-    button.setButtonText("START");
-    addAndMakeVisible(&button);
-    button.setBounds(100, 150, 70, 70);
-    button1.setButtonText("STOP");
-    addAndMakeVisible(&button1);
-    button1.setBounds(210, 150, 70, 70);
-    button2.setButtonText("ENTER");
-    addAndMakeVisible(&button2);
-    button2.setBounds(320, 150, 70, 70);
 
-    button.onClick = [this]() {
-        //týklanansembol yollancak
-        boost::asio::io_context ioContext;
-
-        std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
-        std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
-
-        BinanceBotApplication bot(ioContext, apiKey, secretKey);
-        bot.run();
-
-        ioContext.run();
-
-        return 0;
-    };
-
-    button1.onClick = [this]() {
-        
-    };
-
-    button2.onClick = [this]() {
-        
-    };
+    
 }
 
 
