@@ -1,17 +1,24 @@
 #include "BinanceBotApplication.h"
 #include <iostream>
 #include <string>
-#include <boost/asio.hpp>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 #include <iomanip>
 #include <sstream>
+#include <nlohmann/json.hpp>
 
 namespace asio = boost::asio;
 
-BinanceBotApplication::BinanceBotApplication(boost::asio::io_context& ioContext, const std::string& apiKey, const std::string& secretKey)
-    : ioContext(ioContext), apiKey(apiKey), secretKey(secretKey)
+BinanceBotApplication::BinanceBotApplication(const std::string& apiKey, const std::string& secretKey)
+    : apiKey(apiKey), secretKey(secretKey)
 {
+
+    // This holds the root certificate used for verification
+    load_root_certificates(ctx);
+
+    // Verify the remote server's certificate
+    ctx.set_verify_mode(ssl::verify_peer);
+
 }
 /*int BinanceBotApplication::getTickerPrice(const std::string& symbol)
 {
@@ -33,38 +40,43 @@ std::string BinanceBotApplication::placeOrder(const std::string& symbol, const s
     std::string timestamp = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
     std::string query = "symbol=" + symbol + "&side=" + side + "&type=LIMIT&timeInForce=GTC&quantity=" + std::to_string(quantity) + "&price=" + std::to_string(price) + "&timestamp=" + timestamp;
     std::string signature = hmac_sha256(query, apiKey);
-    std::string response = post(url, query + "&signature=" + signature, { "X-MBX-APIKEY: " + secretKey });
+    std::string response; //= post(url, query + "&signature=" + signature, { "X-MBX-APIKEY: " + secretKey });
     return response;
 }
-std::string BinanceBotApplication::post(const std::string& url, const std::string& data, const std::vector<std::string>& headers)
+std::string BinanceBotApplication::testNewOrder()
 {
-    asio::io_context io_context;
-    asio::ip::tcp::resolver resolver(io_context);
-    asio::ip::tcp::socket socket(io_context);
+    // Launch the asynchronous operation
+    // The session is constructed with a strand to
+    // ensure that handlers do not execute concurrently.
+    auto ses = std::make_shared<AsyncHttpsSession>(
+        net::make_strand(ioc),
+        ctx
+    );
+    boost::url_view base_api{"https://api.binance.com/api/v3/"};
 
-    // Resolve endpoint
-    auto endpoints = resolver.resolve(url, "http");
-    asio::connect(socket, endpoints);
+    boost::url url_("order");
 
-    // Prepare HTTP request
-    beast::http::request<beast::http::string_body> request(beast::http::verb::post, url, 11);
-    request.body() = data;
-    request.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-    request.set(beast::http::field::content_type, "application/x-www-form-urlencoded");
-    request.prepare_payload();
+    std::unordered_map<std::string, std::string> header;
 
-    // Send HTTP request
-    beast::http::write(socket, request);
+    header.insert({ "X-MBX-APIKEY",apiKey });
 
-    // Receive HTTP response
-    beast::flat_buffer buffer;
-    beast::http::response<beast::http::string_body> response;
-    beast::http::read(socket, buffer, response);
+    url_.params().append({ "symbol", "BTCUSDT" });
+    url_.params().append({ "side", "SELL" });
+    url_.params().append({ "type", "MARKET" });
+    url_.params().append({ "quantity", "1" });
+    std::string timestamp = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+    url_.params().append({ "timestamp", timestamp });
 
-    socket.shutdown(asio::ip::tcp::socket::shutdown_both);
-    socket.close();
+    auto signature = hmac_sha256(url_.query(), secretKey);
+    url_.params().append({ "signature", signature });
 
-    return response.body();
+    ses->run(AsyncHttpsSession::make_url(base_api, url_), http::verb::post, header);
+
+    // Run the I/O service. The call will return when
+    // the get operation is complete.
+    ioc.run();
+
+    return "";
 }
 size_t BinanceBotApplication::writeCallback(char* ptr, size_t size, size_t nmemb, void* userdata)
 {

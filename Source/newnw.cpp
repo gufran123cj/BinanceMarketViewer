@@ -3,6 +3,7 @@
 #include "MyModel.h"
 #include "map";
 #include "BinanceBotApplication.h"
+#include "AsyncHttpsSession.h"
 
 newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
     juce::DocumentWindow(clickedSymbol, juce::Desktop::getInstance().getDefaultLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId),
@@ -19,13 +20,17 @@ newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
     button2.setButtonText("ENTER");
    
     button.onClick = [this]() {
-        boost::asio::io_context ioContext;
-
         std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
         std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
 
-        BinanceBotApplication bot(ioContext, apiKey, secretKey);
+     
+        BinanceBotApplication bot(apiKey, secretKey);
 
+        bot.testNewOrder();
+        //const MarketData& rowData = model->data[selectedSymbol.toStdString()];
+        //double currentprice= rowData.price;
+        //double buyPrice = rowData.price - 5.0; // Alým yapýlacak fiyat
+        //double sellPrice = rowData.price + 5.0; // Satým yapýlacak fiyat
         //std::string symbol = "BTCUSDT";
         //double quantity = 0.1;
         //double marginPercent = 0.005; // %0.5 margin
@@ -33,9 +38,7 @@ newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
         //bot.placeBuyOrderWithMargin(symbol, quantity, marginPercent);
         //bot.placeSellOrderWithMargin(symbol, quantity, marginPercent);
 
-        std::string order = bot.placeOrder("BTCUSDT", "BUY", 0.01, 50000);       
-        ioContext.run();
-
+        /*std::string order = bot.placeOrder("BTCUSDT", "BUY", 0.01, 50000);       */
         return 0;
     };
 
