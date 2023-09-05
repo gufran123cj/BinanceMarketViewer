@@ -22,23 +22,9 @@ newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
     button.onClick = [this]() {
         std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
         std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
-
-     
         BinanceBotApplication bot(apiKey, secretKey);
 
-        bot.testNewOrder();
-        //const MarketData& rowData = model->data[selectedSymbol.toStdString()];
-        //double currentprice= rowData.price;
-        //double buyPrice = rowData.price - 5.0; // Alým yapýlacak fiyat
-        //double sellPrice = rowData.price + 5.0; // Satým yapýlacak fiyat
-        //std::string symbol = "BTCUSDT";
-        //double quantity = 0.1;
-        //double marginPercent = 0.005; // %0.5 margin
-        
-        //bot.placeBuyOrderWithMargin(symbol, quantity, marginPercent);
-        //bot.placeSellOrderWithMargin(symbol, quantity, marginPercent);
-
-        /*std::string order = bot.placeOrder("BTCUSDT", "BUY", 0.01, 50000);       */
+        bot.testNewOrder();        
         return 0;
     };
 
@@ -160,7 +146,36 @@ int newnw::getNumRows()
     }
     return 0;
 }
+void newnw::Stackprice() {
+    const MarketData& rowData = model->data[selectedSymbol.toStdString()];
+    std::string newPrice = rowData.price;
+    if (std::find(pricehistory.begin(), pricehistory.end(), newPrice) == pricehistory.end()) {        
+        pricehistory.push_back(newPrice);
+        std::sort(pricehistory.rbegin(), pricehistory.rend());
+    }
+    int index = -1;
+    for (size_t i = 0; i < pricehistory.size(); ++i) {
+        if (newPrice == pricehistory[i]) {
+            index = static_cast<int>(i);
+            break;
+        }
+    }
 
+    if (index != -1) {
+        int newPriceID = index;
+        int targetIndex = newPriceID + 5;
+        int targetIndex1 = newPriceID - 5;
+
+        // Eðer hedef indeks pricehistory vektörünün sýnýrlarý içindeyse ve hedef deðer ile newPrice aynýysa satým yap
+        if (targetIndex < pricehistory.size() && newPrice == pricehistory[targetIndex]) {
+            OutputDebugString("Satim");
+        }
+        if (targetIndex1 < pricehistory.size() && newPrice == pricehistory[targetIndex1]) {
+            OutputDebugString("alým");
+        }
+    }
+
+}
 
 
 void newnw::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
@@ -215,7 +230,7 @@ void newnw::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width,
             break;
         }
     }
-
+    Stackprice();
     
 }
 

@@ -25,11 +25,13 @@ public:
 	virtual void handleAsyncUpdate() override;
 	virtual void update() override;
 	void createTable();
+	void Stackprice();
 	void closeButtonPressed() override;
 private:
 	juce::GroupComponent group;
 	std::shared_ptr<MyModel> model;
 	Flasher flasher;
+	std::vector<std::string> pricehistory;
 	juce::TextButton button;
 	juce::TextButton button1;
 	juce::TextButton button2;

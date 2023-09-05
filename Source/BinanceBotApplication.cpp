@@ -20,19 +20,7 @@ BinanceBotApplication::BinanceBotApplication(const std::string& apiKey, const st
     ctx.set_verify_mode(ssl::verify_peer);
 
 }
-/*int BinanceBotApplication::getTickerPrice(const std::string& symbol)
-{
-    std::string url = "https://api.binance.com/api/v3/ticker/price?symbol=" + symbol;
-    std::string response = get(url);
-    return json::parse(response);
-}
 
-int BinanceBotApplication::getOrderBook(const std::string& symbol, int limit)
-{
-    std::string url = "https://api.binance.com/api/v3/depth?symbol=" + symbol + "&limit=" + std::to_string(limit);
-    std::string response = get(url);
-    return json::parse(response);
-}*/
 
 std::string BinanceBotApplication::placeOrder(const std::string& symbol, const std::string& side, double quantity, double price)
 {
