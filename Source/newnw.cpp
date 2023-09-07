@@ -5,9 +5,9 @@
 #include "BinanceBotApplication.h"
 #include "AsyncHttpsSession.h"
 
-newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
+newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel, std::vector<std::string> pricehistory, std::string lastprice) :
     juce::DocumentWindow(clickedSymbol, juce::Desktop::getInstance().getDefaultLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId),
-        juce::DocumentWindow::allButtons), selectedSymbol(clickedSymbol)
+        juce::DocumentWindow::allButtons), selectedSymbol(clickedSymbol), pricehistory1(pricehistory),lastprice1(lastprice)
 {
     this->model = aModel;
     group.addAndMakeVisible(button);
@@ -22,7 +22,8 @@ newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel) :
     button.onClick = [this]() {
         std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
         std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
-        BinanceBotApplication bot(apiKey, secretKey);
+
+        BinanceBotApplication bot(apiKey, secretKey, selectedSymbol, pricehistory1,lastprice1);
 
         bot.testNewOrder();        
         return 0;
@@ -149,32 +150,11 @@ int newnw::getNumRows()
 void newnw::Stackprice() {
     const MarketData& rowData = model->data[selectedSymbol.toStdString()];
     std::string newPrice = rowData.price;
-    if (std::find(pricehistory.begin(), pricehistory.end(), newPrice) == pricehistory.end()) {        
-        pricehistory.push_back(newPrice);
-        std::sort(pricehistory.rbegin(), pricehistory.rend());
+    lastprice1 = newPrice;
+    if (std::find(pricehistory1.begin(), pricehistory1.end(), newPrice) == pricehistory1.end()) {
+        pricehistory1.push_back(newPrice);
+        std::sort(pricehistory1.rbegin(), pricehistory1.rend());
     }
-    int index = -1;
-    for (size_t i = 0; i < pricehistory.size(); ++i) {
-        if (newPrice == pricehistory[i]) {
-            index = static_cast<int>(i);
-            break;
-        }
-    }
-
-    if (index != -1) {
-        int newPriceID = index;
-        int targetIndex = newPriceID + 5;
-        int targetIndex1 = newPriceID - 5;
-
-        // Eðer hedef indeks pricehistory vektörünün sýnýrlarý içindeyse ve hedef deðer ile newPrice aynýysa satým yap
-        if (targetIndex < pricehistory.size() && newPrice == pricehistory[targetIndex]) {
-            OutputDebugString("Satim");
-        }
-        if (targetIndex1 < pricehistory.size() && newPrice == pricehistory[targetIndex1]) {
-            OutputDebugString("alým");
-        }
-    }
-
 }
 
 

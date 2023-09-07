@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include "MyModel.h"
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
@@ -18,16 +19,17 @@ class BinanceBotApplication
 {
 public:
 
-    BinanceBotApplication(const std::string& apiKey, const std::string& secretKey);
+    BinanceBotApplication(const std::string& apiKey, const std::string& secretKey, juce::String clickedSymbol, std::vector<std::string> pricehistory1, std::string lastprice1);
 
     std::string placeOrder(const std::string& symbol, const std::string& side, double quantity, double price);
     std::string testNewOrder();
-
-
-    size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userdata);
     std::string hmac_sha256(const std::string& data, const std::string& key);
    
 private:
+    std::string finalprice;
+    std::vector<std::string> price;
+    juce::String selectedSymbol;
+    std::shared_ptr<MyModel> model;
     // The io_context is required for all I/O
     net::io_context ioc;
     // The SSL context is required, and holds certificates

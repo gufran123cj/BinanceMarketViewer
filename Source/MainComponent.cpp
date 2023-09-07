@@ -77,11 +77,15 @@ void MainComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 }
 void MainComponent::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent& e)
 {
+    std::vector<std::string> pricehistory1;
+
     std::map<std::string, MarketData> dataMap = model->data; 
     auto it = std::next(dataMap.begin(), rowNumber);
+
     const std::string& selectedSymbol = it->first;
-    const MarketData& selectedData = it->second;   
-    newnw* newWindow = new newnw(selectedSymbol, model);
+    const MarketData& selectedData = it->second;
+    std::string lastprice;
+    newnw* newWindow = new newnw(selectedSymbol, model, pricehistory1,lastprice);
 }
 void MainComponent::handleAsyncUpdate()
 {

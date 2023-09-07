@@ -18,7 +18,7 @@ class newnw :
 
 {
 public:
-	newnw(juce::String clickcedsymbol, std::shared_ptr<MyModel> aModel);
+	newnw(juce::String clickcedsymbol, std::shared_ptr<MyModel> aModel, std::vector<std::string> pricehistory, std::string lastprice);
 	virtual void onDataReceived(std::map<std::string, MarketData>& data) override;
 	juce::Label* label;
 	void resized() override;
@@ -26,12 +26,13 @@ public:
 	virtual void update() override;
 	void createTable();
 	void Stackprice();
+	std::vector<std::string> pricehistory1;
+	std::string lastprice1;
 	void closeButtonPressed() override;
 private:
 	juce::GroupComponent group;
 	std::shared_ptr<MyModel> model;
 	Flasher flasher;
-	std::vector<std::string> pricehistory;
 	juce::TextButton button;
 	juce::TextButton button1;
 	juce::TextButton button2;

@@ -9,8 +9,8 @@
 
 namespace asio = boost::asio;
 
-BinanceBotApplication::BinanceBotApplication(const std::string& apiKey, const std::string& secretKey)
-    : apiKey(apiKey), secretKey(secretKey)
+BinanceBotApplication::BinanceBotApplication(const std::string& apiKey, const std::string& secretKey, juce::String clickedSymbol, std::vector<std::string> pricehistory1, std::string lastprice1)
+    : apiKey(apiKey), secretKey(secretKey), selectedSymbol(clickedSymbol),price(pricehistory1),finalprice(lastprice1)
 {
 
     // This holds the root certificate used for verification
@@ -33,6 +33,7 @@ std::string BinanceBotApplication::placeOrder(const std::string& symbol, const s
 }
 std::string BinanceBotApplication::testNewOrder()
 {
+
     // Launch the asynchronous operation
     // The session is constructed with a strand to
     // ensure that handlers do not execute concurrently.
@@ -47,9 +48,31 @@ std::string BinanceBotApplication::testNewOrder()
     std::unordered_map<std::string, std::string> header;
 
     header.insert({ "X-MBX-APIKEY",apiKey });
-
-    url_.params().append({ "symbol", "BTCUSDT" });
-    url_.params().append({ "side", "SELL" });
+    //std::string newPrice = rowData.price;
+    int index = -1;
+    for (size_t i = 0; i < price.size(); ++i) {
+        if (finalprice == price[i]) {
+            index = static_cast<int>(i);
+            break;
+        }
+    }
+    if (index != -1) {
+        int finalpriceID = index;
+        int targetIndex = finalpriceID + 5;
+        int targetIndex1 = finalpriceID - 5;
+        std::string stringsymbol = selectedSymbol.toStdString();
+        // Eðer hedef indeks pricehistory vektörünün sýnýrlarý içindeyse ve hedef deðer ile newPrice aynýysa satým yap
+        if (targetIndex < price.size() && finalprice == price[targetIndex]) {
+            url_.params().append({ "symbol", stringsymbol });
+            url_.params().append({ "side", "SELL" });
+            OutputDebugString("Satim");
+        }
+        if (targetIndex1 < price.size() && finalprice == price[targetIndex1]) {
+            url_.params().append({ "symbol", stringsymbol });
+            url_.params().append({ "side", "BUY" });
+            OutputDebugString("alým");
+        }
+    }
     url_.params().append({ "type", "MARKET" });
     url_.params().append({ "quantity", "1" });
     std::string timestamp = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
@@ -66,13 +89,6 @@ std::string BinanceBotApplication::testNewOrder()
 
     return "";
 }
-size_t BinanceBotApplication::writeCallback(char* ptr, size_t size, size_t nmemb, void* userdata)
-{
-    std::string* response = (std::string*)userdata;
-    response->append(ptr, size * nmemb);
-    return size * nmemb;
-}
-
 std::string BinanceBotApplication::hmac_sha256(const std::string& data, const std::string& key)
 {
     unsigned char hash[SHA256_DIGEST_LENGTH];
