@@ -42,6 +42,11 @@ namespace net = boost::asio;            // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
+class ResponseParser
+{
+public:
+    virtual void parseResponse(const std::string&) = 0;
+};
 //------------------------------------------------------------------------------
 
 // Performs an HTTP GET and prints the response
@@ -52,12 +57,14 @@ class AsyncHttpsSession : public std::enable_shared_from_this<AsyncHttpsSession>
     beast::flat_buffer buffer_; // (Must persist between reads)
     http::request<http::empty_body> req_;
     http::response<http::string_body> res_;
-public:
-    explicit
-        AsyncHttpsSession(
-            net::any_io_executor ex,
-            ssl::context& ctx);
+    ResponseParser* parser;
 
+public:
+    
+        explicit AsyncHttpsSession(
+            net::any_io_executor ex,
+            ResponseParser* parser,
+            ssl::context& ctx);
     static boost::url make_url(boost::url_view base_api, boost::url_view method) {
         assert(!method.is_path_absolute());
         assert(base_api.data()[base_api.size() - 1] == '/');
@@ -95,6 +102,8 @@ public:
 
     void
         on_shutdown(beast::error_code ec);
+
+    std::string getResponseBody();
 };
 
 //------------------------------------------------------------------------------

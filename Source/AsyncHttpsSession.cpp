@@ -17,9 +17,11 @@ failAsyncHttpsSession(beast::error_code ec, char const* what)
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-AsyncHttpsSession::AsyncHttpsSession(net::any_io_executor ex, ssl::context& ctx)
+AsyncHttpsSession::AsyncHttpsSession(net::any_io_executor ex, ResponseParser* aParser, ssl::context& ctx)
     : resolver_(ex)
-    , stream_(ex, ctx)
+    , stream_(ex, ctx),
+    parser(aParser)
+
 {
 }
 
@@ -131,13 +133,11 @@ void AsyncHttpsSession::on_read(beast::error_code ec, std::size_t bytes_transfer
     // Write the message to standard out
     std::cout << res_ << std::endl;
     OutputDebugString(res_.body().c_str());
-    // calisir hale geldi istek, bakiye yetersiz oldugu icin basarisiz oldu
-    // cok ucuz bi coin bulup onda test edebilirsin
-    // {"code":-2010,"msg":"Account has insufficient balance for requested action."}
-    // 
+    
     // Set a timeout on the operation
     beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
-
+    if(parser)
+        parser->parseResponse(res_.body().c_str());
     // Gracefully close the stream
     stream_.async_shutdown(
         beast::bind_front_handler(
@@ -157,4 +157,8 @@ void AsyncHttpsSession::on_shutdown(beast::error_code ec)
         return failAsyncHttpsSession(ec, "shutdown");
 
     // If we get here then the connection is closed gracefully
+}
+
+std::string AsyncHttpsSession::getResponseBody() {
+    return res_.body().c_str(); // HTTP yanýtýnýn gövdesini döndür
 }

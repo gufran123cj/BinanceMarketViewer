@@ -9,6 +9,7 @@
 #include "MyViewInterface.h"
 #include "data_provider.h"
 #include "data_listener.h"
+#include "BinanceBotApplication.h"
 
 
 class MyModel:
@@ -19,7 +20,7 @@ class MyModel:
 public:
 	
 	MyModel() : view(nullptr)
-		, data()
+		, data(),bot(apiKey, secretKey)
 	{
 		//startTimer(1000);
 
@@ -33,6 +34,7 @@ public:
 		if(aView)
 			view = aView;
 	}
+	
 	void run();
 	void onDataReceived(const std::string& message);
 	void addDataListener(data_listener* listener);
@@ -43,8 +45,12 @@ public:
 	std::string response;
 	std::string message;
 	MyViewInterface* view;
+	std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
+	std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
+	BinanceBotApplication bot;
 
 private:
+
 	juce::TableListBox table;
 	juce::Font font{ 14.0f };
 	std::vector<std::string> parsedElements;

@@ -8,28 +8,37 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include "MyModel.h"
+#include <nlohmann/json.hpp>
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-class BinanceBotApplication
+class BinanceBotApplication : public ResponseParser
 {
 public:
 
-    BinanceBotApplication(const std::string& apiKey, const std::string& secretKey, juce::String clickedSymbol, std::vector<std::string> pricehistory1, std::string lastprice1);
+    BinanceBotApplication(const std::string& apiKey, const std::string& secretKey);
 
-    std::string placeOrder(const std::string& symbol, const std::string& side, double quantity, double price);
+    void sendOrderBookResponse();
+
+    void parseOrderBookResponse(const std::string &apiResponse);
+
+    void sendTradeFeeRequest();
+
+    void parseTradeFeeRequest(std::vector<std::string> TradeFee);
+
+    std::string deleteNewOrder();
     std::string testNewOrder();
     std::string hmac_sha256(const std::string& data, const std::string& key);
    
 private:
     std::string finalprice;
-    std::vector<std::string> price;
+    std::vector<std::string> orderBookData;
+    std::vector<std::string> TradeFee;
+    using json = nlohmann::json;
     juce::String selectedSymbol;
-    std::shared_ptr<MyModel> model;
     // The io_context is required for all I/O
     net::io_context ioc;
     // The SSL context is required, and holds certificates
@@ -38,6 +47,10 @@ private:
     std::string apiKey;
     std::string secretKey;
    
+
+    // Inherited via ResponseParser
+    virtual void parseResponse(const std::string&) override;
+
 };
 #endif // !BinanceBotApplication_h
 

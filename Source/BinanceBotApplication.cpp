@@ -5,12 +5,11 @@
 #include <openssl/sha.h>
 #include <iomanip>
 #include <sstream>
-#include <nlohmann/json.hpp>
 
 namespace asio = boost::asio;
 
-BinanceBotApplication::BinanceBotApplication(const std::string& apiKey, const std::string& secretKey, juce::String clickedSymbol, std::vector<std::string> pricehistory1, std::string lastprice1)
-    : apiKey(apiKey), secretKey(secretKey), selectedSymbol(clickedSymbol),price(pricehistory1),finalprice(lastprice1)
+BinanceBotApplication::BinanceBotApplication(const std::string& apiKey, const std::string& secretKey)
+    : apiKey(apiKey), secretKey(secretKey)
 {
 
     // This holds the root certificate used for verification
@@ -21,22 +20,134 @@ BinanceBotApplication::BinanceBotApplication(const std::string& apiKey, const st
 
 }
 
+void BinanceBotApplication::sendOrderBookResponse() {
+    auto instance = new AsyncHttpsSession(
+        net::make_strand(ioc), dynamic_cast<ResponseParser*>(this),
+        ctx );
 
-std::string BinanceBotApplication::placeOrder(const std::string& symbol, const std::string& side, double quantity, double price)
-{
-    std::string url = "https://api.binance.com/api/v3/order";
+    auto ses = std::shared_ptr<AsyncHttpsSession>(instance);
+
+    boost::url_view base_api{"https://api.binance.com/api/v3/"};
+
+    
+    std::string selectedSymbol = "PEPEUSDT"; 
+
+    boost::url url_("depth");
+
+    std::unordered_map<std::string, std::string> header;
+
+    header.insert({ "X-MBX-APIKEY", apiKey });
+
+    url_.params().append({ "symbol", selectedSymbol });
+    //hata
+    ses->run(AsyncHttpsSession::make_url(base_api, url_), http::verb::get, header);
+    
+   
+}
+
+void BinanceBotApplication::parseOrderBookResponse(const std::string &apiResponse) {
+        try {
+            json jsonResponse = json::parse(apiResponse);
+
+            json bids = jsonResponse["bids"];
+            json asks = jsonResponse["asks"];
+
+            for (const auto& bid : bids) {
+                double price = bid[0]; 
+                double quantity = bid[1]; 
+
+                
+            }
+
+            for (const auto& ask : asks) {
+                double price = ask[0]; 
+                double quantity = ask[1];              
+            }
+        }
+        catch (const json::exception& e) {
+            std::cerr << "JSON parsing error: " << e.what() << std::endl;
+        }
+    
+
+}
+void BinanceBotApplication::sendTradeFeeRequest() {
+    auto ses = std::make_shared<AsyncHttpsSession>(
+        net::make_strand(ioc),
+        ctx
+    );
+
+    boost::url_view base_api{"https://api.binance.com/sapi/v1/asset/"};
+
+
+    std::string selectedSymbol = "PEPEUSDT";
+    boost::url url_("tradeFee");
+    std::unordered_map<std::string, std::string> header;
+    header.insert({ "X-MBX-APIKEY", apiKey });
+    url_.params().append({ "symbol", selectedSymbol });
     std::string timestamp = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
-    std::string query = "symbol=" + symbol + "&side=" + side + "&type=LIMIT&timeInForce=GTC&quantity=" + std::to_string(quantity) + "&price=" + std::to_string(price) + "&timestamp=" + timestamp;
-    std::string signature = hmac_sha256(query, apiKey);
-    std::string response; //= post(url, query + "&signature=" + signature, { "X-MBX-APIKEY: " + secretKey });
-    return response;
+    url_.params().append({ "timestamp", timestamp });
+
+    auto signature = hmac_sha256(url_.query(), secretKey);
+    url_.params().append({ "signature", signature });
+    ses->run(AsyncHttpsSession::make_url(base_api, url_), http::verb::get, header);
+    //BOÞ GELÝYOR   
+    std::string apiResponse = ses->getResponseBody();
+    TradeFee.push_back(apiResponse);
+
+    parseTradeFeeRequest(TradeFee);
+
+
+}
+void BinanceBotApplication::parseTradeFeeRequest(std::vector<std::string> TradeFee) {
+    try {
+        for (const std::string& apiResponse : TradeFee) {
+        json jsonResponse = json::parse(apiResponse);
+        double makerCommission = jsonResponse["makerCommission"];
+        double takerCommission = jsonResponse["takerCommission"];
+
+            
+        
+        }
+    }
+    catch (const json::exception& e) {
+        // Handle JSON parsing errors
+        std::cerr << "JSON parsing error: " << e.what() << std::endl;
+    }
+
+}
+
+std::string BinanceBotApplication::deleteNewOrder() {
+    auto ses = std::make_shared<AsyncHttpsSession>(
+        net::make_strand(ioc),
+        ctx
+    );
+    boost::url_view base_api{"https://api.binance.com/api/v3/"};
+
+    boost::url url_("delete");
+
+    std::unordered_map<std::string, std::string> header;
+    std::string selectedSymbol = "PEPEUSDT";
+
+    header.insert({ "X-MBX-APIKEY",apiKey });
+
+
+    url_.params().append({ "symbol", selectedSymbol });
+    std::string timestamp = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+    url_.params().append({ "timestamp", timestamp });
+    auto signature = hmac_sha256(url_.query(), secretKey);
+    url_.params().append({ "signature", signature });
+    ses->run(AsyncHttpsSession::make_url(base_api, url_), http::verb::delete_, header);
+    OutputDebugString("DURDUR");
+
+    // Run the I/O service. The call will return when
+    // the get operation is complete.
+    ioc.run();
+
+    return "";
+
 }
 std::string BinanceBotApplication::testNewOrder()
 {
-
-    // Launch the asynchronous operation
-    // The session is constructed with a strand to
-    // ensure that handlers do not execute concurrently.
     auto ses = std::make_shared<AsyncHttpsSession>(
         net::make_strand(ioc),
         ctx
@@ -46,33 +157,12 @@ std::string BinanceBotApplication::testNewOrder()
     boost::url url_("order");
 
     std::unordered_map<std::string, std::string> header;
+    std::string selectedSymbol = "PEPEUSDT";
 
     header.insert({ "X-MBX-APIKEY",apiKey });
     //std::string newPrice = rowData.price;
-    int index = -1;
-    for (size_t i = 0; i < price.size(); ++i) {
-        if (finalprice == price[i]) {
-            index = static_cast<int>(i);
-            break;
-        }
-    }
-    if (index != -1) {
-        int finalpriceID = index;
-        int targetIndex = finalpriceID + 5;
-        int targetIndex1 = finalpriceID - 5;
-        std::string stringsymbol = selectedSymbol.toStdString();
-        // Eðer hedef indeks pricehistory vektörünün sýnýrlarý içindeyse ve hedef deðer ile newPrice aynýysa satým yap
-        if (targetIndex < price.size() && finalprice == price[targetIndex]) {
-            url_.params().append({ "symbol", stringsymbol });
-            url_.params().append({ "side", "SELL" });
-            OutputDebugString("Satim");
-        }
-        if (targetIndex1 < price.size() && finalprice == price[targetIndex1]) {
-            url_.params().append({ "symbol", stringsymbol });
-            url_.params().append({ "side", "BUY" });
-            OutputDebugString("alým");
-        }
-    }
+    url_.params().append({ "symbol", selectedSymbol });
+    url_.params().append({ "side", "SELL" });
     url_.params().append({ "type", "MARKET" });
     url_.params().append({ "quantity", "1" });
     std::string timestamp = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
@@ -105,6 +195,11 @@ std::string BinanceBotApplication::hmac_sha256(const std::string& data, const st
         ss << std::setw(2) << std::setfill('0') << (int)i;
     }
     return ss.str();
+}
+
+void BinanceBotApplication::parseResponse(const std::string& response)
+{
+    parseOrderBookResponse(response);
 }
 
 

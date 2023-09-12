@@ -14,6 +14,7 @@
 
 
 
+
 void MyModel::run() {
     data_provider ses;
 
@@ -73,11 +74,11 @@ void MyModel::parseresponse(std::string response)
 
         }
         
-        for (auto& i : listeners)
-        {
+        for (auto& i : listeners) {
             
                 i->onDataReceived(data);
-        }
+            
+        }//removelistener yazýlýcak
 
         
     }

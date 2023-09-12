@@ -18,19 +18,20 @@ newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel, std::v
     button.setButtonText("START");
     button1.setButtonText("STOP");
     button2.setButtonText("ENTER");
-   
+    
+
     button.onClick = [this]() {
-        std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
-        std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
+        
+        model->bot.testNewOrder(); 
+        //model->bot.sendOrderBookResponse();
+        //model->bot.sendTradeFeeRequest();
 
-        BinanceBotApplication bot(apiKey, secretKey, selectedSymbol, pricehistory1,lastprice1);
-
-        bot.testNewOrder();        
         return 0;
     };
 
     button1.onClick = [this]() {
-
+        /*bot.deleteNewOrder();
+        return 0;*/
     };
 
     button2.onClick = [this]() {
