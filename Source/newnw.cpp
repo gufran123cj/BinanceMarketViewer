@@ -22,8 +22,8 @@ newnw::newnw(juce::String clickedSymbol, std::shared_ptr<MyModel> aModel, std::v
 
     button.onClick = [this]() {
         
-        model->bot.testNewOrder(); 
-        //model->bot.sendOrderBookResponse();
+        //model->bot.testNewOrder(); 
+        model->bot.sendOrderBookResponse();
         //model->bot.sendTradeFeeRequest();
 
         return 0;

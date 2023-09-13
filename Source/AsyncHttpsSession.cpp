@@ -17,10 +17,10 @@ failAsyncHttpsSession(beast::error_code ec, char const* what)
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-AsyncHttpsSession::AsyncHttpsSession(net::any_io_executor ex, ResponseParser* aParser, ssl::context& ctx)
+AsyncHttpsSession::AsyncHttpsSession(net::any_io_executor ex, ssl::context& ctx)
     : resolver_(ex)
-    , stream_(ex, ctx),
-    parser(aParser)
+    , stream_(ex, ctx)
+    ,parser(nullptr)
 
 {
 }

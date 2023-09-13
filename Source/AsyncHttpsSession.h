@@ -57,13 +57,12 @@ class AsyncHttpsSession : public std::enable_shared_from_this<AsyncHttpsSession>
     beast::flat_buffer buffer_; // (Must persist between reads)
     http::request<http::empty_body> req_;
     http::response<http::string_body> res_;
-    ResponseParser* parser;
+    //ResponseParser* parser;
 
 public:
-    
+    ResponseParser* parser;
         explicit AsyncHttpsSession(
             net::any_io_executor ex,
-            ResponseParser* parser,
             ssl::context& ctx);
     static boost::url make_url(boost::url_view base_api, boost::url_view method) {
         assert(!method.is_path_absolute());

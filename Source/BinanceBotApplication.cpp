@@ -21,13 +21,12 @@ BinanceBotApplication::BinanceBotApplication(const std::string& apiKey, const st
 }
 
 void BinanceBotApplication::sendOrderBookResponse() {
-    auto instance = new AsyncHttpsSession(
-        net::make_strand(ioc), dynamic_cast<ResponseParser*>(this),
-        ctx );
-
-    auto ses = std::shared_ptr<AsyncHttpsSession>(instance);
+    
+    auto ses = std::make_shared<AsyncHttpsSession>(net::make_strand(ioc),
+        ctx);
 
     boost::url_view base_api{"https://api.binance.com/api/v3/"};
+    ses->parser = this;
 
     
     std::string selectedSymbol = "PEPEUSDT"; 
@@ -36,17 +35,19 @@ void BinanceBotApplication::sendOrderBookResponse() {
 
     std::unordered_map<std::string, std::string> header;
 
-    header.insert({ "X-MBX-APIKEY", apiKey });
+    //header.insert({ "X-MBX-APIKEY", apiKey });
 
     url_.params().append({ "symbol", selectedSymbol });
     //hata
     ses->run(AsyncHttpsSession::make_url(base_api, url_), http::verb::get, header);
-    
+    ioc.run();
+
    
 }
 
 void BinanceBotApplication::parseOrderBookResponse(const std::string &apiResponse) {
-        try {
+        
+    try {
             json jsonResponse = json::parse(apiResponse);
 
             json bids = jsonResponse["bids"];
@@ -95,6 +96,7 @@ void BinanceBotApplication::sendTradeFeeRequest() {
     TradeFee.push_back(apiResponse);
 
     parseTradeFeeRequest(TradeFee);
+    ioc.run();
 
 
 }
@@ -105,8 +107,7 @@ void BinanceBotApplication::parseTradeFeeRequest(std::vector<std::string> TradeF
         double makerCommission = jsonResponse["makerCommission"];
         double takerCommission = jsonResponse["takerCommission"];
 
-            
-        
+                   
         }
     }
     catch (const json::exception& e) {
