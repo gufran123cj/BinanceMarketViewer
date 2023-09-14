@@ -15,8 +15,8 @@ namespace net = boost::asio;            // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-class BinanceBotApplication : public ResponseParser
-{
+class BinanceBotApplication : public ResponseParser {
+
 public:
 
     BinanceBotApplication(const std::string& apiKey, const std::string& secretKey);
@@ -27,16 +27,19 @@ public:
 
     void sendTradeFeeRequest();
 
-    void parseTradeFeeRequest(std::vector<std::string> TradeFee);
+    void parseTradeFeeRequest(const std::string& apiResponse);
 
     std::string deleteNewOrder();
-    std::string testNewOrder();
+    std::string testNewOrder(/*std::string lastprice*/);
     std::string hmac_sha256(const std::string& data, const std::string& key);
    
 private:
+    int count = 0;//for tradefee
+    std::string makerCommission;
+    std::string takerCommission;
+    std::vector< std::string> bids;
+    std::vector< std::string> asks;
     std::string finalprice;
-    std::vector<std::string> orderBookData;
-    std::vector<std::string> TradeFee;
     using json = nlohmann::json;
     juce::String selectedSymbol;
     // The io_context is required for all I/O
@@ -49,7 +52,7 @@ private:
    
 
     // Inherited via ResponseParser
-    virtual void parseResponse(const std::string&) override;
+    virtual void parseResponse(const std::string&, responseType type) override;
 
 };
 #endif // !BinanceBotApplication_h

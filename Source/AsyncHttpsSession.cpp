@@ -133,16 +133,16 @@ void AsyncHttpsSession::on_read(beast::error_code ec, std::size_t bytes_transfer
     // Write the message to standard out
     std::cout << res_ << std::endl;
     OutputDebugString(res_.body().c_str());
-    
+
     // Set a timeout on the operation
     beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
-    if(parser)
-        parser->parseResponse(res_.body().c_str());
+    if (parser)
+        parser->parseResponse(res_.body().c_str(),type);   
     // Gracefully close the stream
-    stream_.async_shutdown(
+    /*stream_.async_shutdown(
         beast::bind_front_handler(
             &AsyncHttpsSession::on_shutdown,
-            shared_from_this()));
+            shared_from_this()));*/
 }
 
 void AsyncHttpsSession::on_shutdown(beast::error_code ec)
@@ -154,11 +154,10 @@ void AsyncHttpsSession::on_shutdown(beast::error_code ec)
         ec = {};
     }
     if (ec)
+        //buraya giriyor
         return failAsyncHttpsSession(ec, "shutdown");
 
     // If we get here then the connection is closed gracefully
 }
 
-std::string AsyncHttpsSession::getResponseBody() {
-    return res_.body().c_str(); // HTTP yanýtýnýn gövdesini döndür
-}
+

@@ -42,11 +42,19 @@ namespace net = boost::asio;            // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
+enum class responseType {
+    tradefee = 0, orderbook = 1
+};
+
+
+
 class ResponseParser
 {
 public:
-    virtual void parseResponse(const std::string&) = 0;
+    virtual void parseResponse(const std::string&, responseType type) = 0;
 };
+
+
 //------------------------------------------------------------------------------
 
 // Performs an HTTP GET and prints the response
@@ -61,6 +69,7 @@ class AsyncHttpsSession : public std::enable_shared_from_this<AsyncHttpsSession>
 
 public:
     ResponseParser* parser;
+    responseType type;
         explicit AsyncHttpsSession(
             net::any_io_executor ex,
             ssl::context& ctx);
@@ -102,7 +111,6 @@ public:
     void
         on_shutdown(beast::error_code ec);
 
-    std::string getResponseBody();
 };
 
 //------------------------------------------------------------------------------
