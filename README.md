@@ -1,2 +1,2 @@
 # BinanceMarketViewer
-binance market viewer
+A clone project for foreks trader application.
