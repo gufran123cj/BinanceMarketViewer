@@ -45,8 +45,8 @@ public:
 	std::string response;
 	std::string message;
 	MyViewInterface* view;
-	std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2frAiVPfWAj00v6LDjusXeSdxWHZVa9m";
-	std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHQVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
+	std::string apiKey = "5ybw5ipsGy3vKqr5iDwL7mnk04mf10Xz2rAiVPfWAj00v6LDjusXeSdxWHZVa9m";
+	std::string secretKey = "hXRGVF8JZ67p0yYL5Qm7XNc4atEHHVtNTQvGjeYs4TenPijvXiO3oBt905k39Ex";
 	BinanceBotApplication bot;
 
 private:
